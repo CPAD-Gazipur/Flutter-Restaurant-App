@@ -17,11 +17,11 @@ class GeoLocationBloc extends Bloc<GeoLocationEvent, GeoLocationState> {
 
   @override
   Stream<GeoLocationState> mapEventToState(
-      GeoLocationEvent geoLocationEvent) async* {
-    if (geoLocationEvent is LoadGeoLocation) {
+      GeoLocationEvent event) async* {
+    if (event is LoadGeoLocation) {
       yield* _mapGeoLocationToState();
-    } else if (geoLocationEvent is UpdateGeoLocation) {
-      yield* _mapUpdateGeoLocationToState(geoLocationEvent);
+    } else if (event is UpdateGeoLocation) {
+      yield* _mapUpdateGeoLocationToState(event);
     }
   }
 

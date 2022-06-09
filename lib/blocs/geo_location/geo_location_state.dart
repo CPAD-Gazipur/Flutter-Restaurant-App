@@ -11,6 +11,7 @@ abstract class GeoLocationState extends Equatable {
 class GeoLocationLoading extends GeoLocationState {}
 
 class GeoLocationLoaded extends GeoLocationState {
+
   final Position position;
 
   const GeoLocationLoaded({required this.position});

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_restaurant_app/blocs/auto_complete/auto_complete_bloc.dart';
 import 'package:flutter_restaurant_app/blocs/geo_location/geo_location_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'widgets/g_map.dart';
@@ -14,6 +15,7 @@ class LocationScreen extends StatelessWidget {
       settings: const RouteSettings(name: routeName),
     );
   }
+
   const LocationScreen({Key? key}) : super(key: key);
 
   @override
@@ -50,15 +52,54 @@ class LocationScreen extends StatelessWidget {
             right: 20,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(
-                  'assets/logo.png',
-                  height: 50,
-                  width: 50,
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: 50,
+                    width: 50,
+                  ),
                 ),
-                const Expanded(
-                  child: LocationSearchBox(),
+                Expanded(
+                  child: Column(
+                    children: [
+                      const LocationSearchBox(),
+                      BlocBuilder<AutoCompleteBloc, AutoCompleteState>(
+                          builder: (context, state) {
+                        if (state is AutoCompleteLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator.adaptive(),
+                          );
+                        } else if (state is AutoCompleteLoaded) {
+                          return Container(
+                            margin: const EdgeInsets.all(8.0),
+                            height: 300,
+                            color: state.placeAutocomplete.isNotEmpty
+                                ? Colors.black.withOpacity(0.6)
+                                : Colors.transparent,
+                            child: ListView.builder(
+                              itemCount: state.placeAutocomplete.length,
+                              itemBuilder: (context, index) {
+                                return ListTile(
+                                  title: Text(
+                                    state.placeAutocomplete[index].description,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline6!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+
+                        return Container();
+                      }),
+                    ],
+                  ),
                 ),
               ],
             ),
