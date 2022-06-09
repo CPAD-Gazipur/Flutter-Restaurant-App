@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_restaurant_app/screens/location/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_restaurant_app/blocs/geo_location/geo_location_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'widgets/g_map.dart';
+import 'widgets/location_search_box.dart';
 
 class LocationScreen extends StatelessWidget {
   static const String routeName = '/location';
@@ -11,7 +14,6 @@ class LocationScreen extends StatelessWidget {
       settings: const RouteSettings(name: routeName),
     );
   }
-
   const LocationScreen({Key? key}) : super(key: key);
 
   @override
@@ -22,12 +24,24 @@ class LocationScreen extends StatelessWidget {
           SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            child: const GoogleMap(
-              myLocationEnabled: true,
-              initialCameraPosition: CameraPosition(
-                target: LatLng(23.8103, 90.4125),
-                zoom: 15,
-              ),
+            child: BlocBuilder<GeoLocationBloc, GeoLocationState>(
+              builder: (context, state) {
+                if (state is GeoLocationLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator.adaptive(),
+                  );
+                } else if (state is GeoLocationLoaded) {
+                  return GMap(
+                    lat: state.position.latitude,
+                    lon: state.position.longitude,
+                    onMapCreated: (GoogleMapController gMapController) {
+                      //controller.complete(gMapController);
+                    },
+                  );
+                } else {
+                  return const Text('Something went wrong');
+                }
+              },
             ),
           ),
           Positioned(
@@ -53,26 +67,58 @@ class LocationScreen extends StatelessWidget {
             bottom: 40,
             left: 20,
             right: 20,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 70,
-              ),
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  onPrimary: Theme.of(context).primaryColor,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 2,
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      onPrimary: Theme.of(context).primaryColor,
+                    ),
+                    child: const Text(
+                      'Save',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
                 ),
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
+                FloatingActionButton(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  onPressed: () {},
+                  child: const Icon(
+                    Icons.location_on_outlined,
                     color: Colors.white,
                   ),
                 ),
-              ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  /*void _currentLocation() async  {
+
+    final GoogleMapController gMapController = await controller.future;
+    LocationData currentLocation;
+    var location = Location();
+    try {
+      currentLocation = await location.getLocation();
+    } on Exception {
+      throw Exception('Error');
+    }
+
+    gMapController.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        bearing: 0,
+        target: LatLng(currentLocation.latitude!, currentLocation.longitude!),
+        zoom: 7.0,
+      ),
+    ));
+
+  }*/
 }
